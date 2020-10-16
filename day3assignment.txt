@@ -1,0 +1,391 @@
+1. Move files fromone folder to the respective folder.
+
+	step1 (creating .txt files)	
+		$ touch abc.txt def.txt ghi.txt jkl.txt
+
+	step2 (showing created files in current directory)
+		$ for fileName in `ls *.txt`; do echo $fileName; done;
+		abc.txt
+		def.txt
+		ghi.txt
+		jkl.txt
+
+	step3 (showing files after removing '.txt' extension)
+		$ for fileName in `ls *.txt`;do folderName=`echo $fileName | awk -F. '{print $1}'`; echo $folderName; done
+		abc
+		def
+		ghi
+		jkl
+
+	step4 (creating directories with filenames and copieng files with respective directories)
+		$ for fileName in `ls *.txt`;do folderName=`echo $fileName | awk -F. '{print $1}'`; mkdir $folderName; cp $fileName $folderName; done
+
+	step5 (showing whether directoriesare created or not)	
+		$ ls
+		abc/  abc.txt  def/  def.txt  ghi/  ghi.txt  jkl/  jkl.txt
+
+	step6 (showing files are copied or not in respective directories)
+	
+		$ for fileName in `ls *.txt`;do folderName=`echo $fileName | awk -F. '{print $1}'`; find $folderName/$fileName; done    
+		abc/abc.txt
+		def/def.txt
+		ghi/ghi.txt
+		jkl/jkl.txt
+
+2. Append current date to all log file names which has etension .log.1 from a folder
+
+	.sh file
+	
+	assign.sh
+	
+	#!/bin/bash -x
+
+	for fileName in `ls *.log.1`
+	do
+			folderName=`echo $fileName | awk -Flog '{print $1}'`;
+			name=$folderName`date +%d%m%y.log`;
+			if [ -d $name ]
+					then
+					rm -r $name;
+					fi;
+			touch $name;
+	done
+
+
+	step1 (Creating .log.1 files)
+	
+		$ touch abc.log.1 def.log.1 ghi.log.1 jkl.log.1
+	
+	step2 (Removing extension)
+		
+		$ for fileName in `ls *.log.1`;do echo $fileName | awk -F.log.1 '{print $1}'; done
+		
+			abc
+			def
+			ghi
+			jkl
+
+	step3 (executing above mentioned assign.sh file to add current date)
+	
+		$ /bin/bash/ ./assign.sh
+		
+	step4 (finding .log file if it is created)
+	
+		$ find *.log
+		
+			abc.180920.log
+			def.180920.log
+			ghi.180920.log
+			jkl.180920.log
+			
+3. Archive the files from /var/log which have modified 7 days ago move them to your backup folder
+
+		step1 (find all the folders in current directory observe those which are modified last 7 days ago)
+		
+			$ ls -l
+		
+			total 3
+			-rw-r--r-- 1 RAVI 197121   6 Sep 12 11:36 a.txt
+			-rw-r--r-- 1 RAVI 197121   4 Sep  8 22:02 b.txt
+			-rw-r--r-- 1 RAVI 197121   0 Sep  9 06:21 c.txt
+			-rwxr-xr-x 1 RAVI 197121 102 Sep 18 12:07 copy.sh*
+			drwxr-xr-x 1 RAVI 197121   0 Sep  7 11:23 dir1/
+			drwxr-xr-x 1 RAVI 197121   0 Sep 12 13:00 original/
+			-rw-r--r-- 1 RAVI 197121   0 Sep 12 13:01 test.txt
+			drwxr-xr-x 1 RAVI 197121   0 Sep 12 13:01 updated/
+		
+		step2
+			(copy.sh file having code execute it)
+			
+			copy.sh
+			
+			
+			#!/bin/bash -x
+			for fileName in ls
+			do
+			fileName=`find *.txt -mtime +2`;
+			cp $fileName ~/backup;	
+			done
+		
+			$ /bin/bash/ ./copy.sh
+			
+		
+		step3 (go to ~/backup dir and do ls -l)
+		
+			$ cd ~/backup
+			$ls -l
+			
+			total 2
+			-rw-r--r-- 1 RAVI 197121 6 Sep 18 12:11 a.txt
+			-rw-r--r-- 1 RAVI 197121 4 Sep 18 12:11 b.txt
+			-rw-r--r-- 1 RAVI 197121 0 Sep 18 12:11 c.txt
+			drwxr-xr-x 1 RAVI 197121 0 Sep 12 12:49 original/
+			-rw-r--r-- 1 RAVI 197121 0 Sep 18 12:11 test.txt
+			
+4.print last four frequently asked URLs count in sorted order from var/log/httpd/access.log
+
+		step1 (Go to linux-content dir)
+		
+		$ cat access.log | awk '{print $11}' | sort | uniq -c | sort -nr | tail -4
+		
+		OUTPUT: 
+		
+			4 "http://fundoopush-dev.bridgelabz.com/wp-login.php"
+			2 "http://fundoopush-dev.bridgelabz.com/.well-known/acme-challenge/4xM-Y1899BrBIJ76P5Er2sj2VhEtyi_DFvfo6xiMXXw"
+			1 "https://fundoopush-dev.bridgelabz.com/dashboard/hashtags/animals"
+			1 "https://fundoopush-dev.bridgelabz.com/dashboard/archive"
+
+5.print last four frequently asked URLs at pericular hours from var/log/httpd/access.log
+
+		$ cat access.log | grep 2019:09 | awk '{print $11}' | sort | uniq | tail -4
+		
+		OUTPUT:
+		
+			"https://fundoopush-dev.bridgelabz.com/add-post"
+			"https://fundoopush-dev.bridgelabz.com/dashboard/article"
+			"https://fundoopush-dev.bridgelabz.com/dashboard/jobs"
+			"https://fundoopush-dev.bridgelabz.com/login"
+
+6.Print list of web responce count in the unique sorted order at specific hours 
+
+		$ cat access.log | grep 2019:09 | awk '{print $9}' | sort | uniq -c | sort -nr | tail -4
+		
+		OUTPUT:
+		
+			338 200
+			2 304
+
+7.Print list of last ten unique client IP from var/log/access.log file
+
+		$ cat access.log | awk '{print $1}' | uniq -c | sort -nr | head -10
+
+		OUTPUT:
+		
+			41 10.56.0.3
+			36 10.56.0.3
+			33 10.56.6.4
+			30 10.56.1.3
+			27 10.56.2.2
+			26 10.56.22.3
+			26 10.56.22.3
+			26 10.56.22.3
+			26 10.56.21.2
+			26 10.56.19.3
+
+8. Chech the folder is eixst or not. if it's not present, create it 
+
+		.sh file
+		
+		code.sh
+		
+		#!/bin/bash/ -x
+		read -p"ENTER A FOLDER NAME TO CREATE : " name;
+
+		if [ -d $name ]
+		then
+			echo Folder Already exist;
+		else
+			mkdir $name;
+			echo Folder $name is Created;
+		fi;
+
+	step1
+		$ ls
+		OUTPUT
+		code.sh
+		
+	step2
+	
+		$ /bin/bash/ ./code.sh
+		
+		OUTPUT:
+		
+		$ /bin/bash/ ./code.sh
+		ENTER A FOLDER NAME TO CREATE : ravi
+		Folder ravi is Created
+	
+	step3 (Enter same dir name again)
+
+		$ /bin/bash/ ./code.sh
+		ENTER A FOLDER NAME TO CREATE : ravi
+		Folder Already exist
+
+9. Execute command 'Hello' and 'ls' and check its execution status in command prompt 
+
+
+		step1 (Make path of to gitbash and open command prompt)
+		
+		>bash.exe
+		$ hello
+		
+		OUTPUT
+		
+		bash : hello: command not found
+		
+		$ echo $?
+		
+		OUTPUT
+		127 (command not found)
+		
+		$ ls
+		
+		OUTPUT
+		
+		a.sh	b.sh 	c.sh 	abc.txt
+		
+		$ echo $?
+		
+		OUTPUT
+		
+		0 (success)
+		
+10. Set environment usersecret="dH34xJaa23". if already not set
+
+		$ env | grep usersecret
+		
+		OUTPUT
+		
+		usersecret=ravi/ravi (Already set with ravi/ravi)
+		
+		$ export usersecret=dH34xJaa23
+		
+		$ env | grep usersecret
+		
+		OUTPUT
+		
+		usersecret=dH34xJaa23 ( ravi/ravi replaced by dH34xJaa23)
+		
+		
+		
+11. Find the word system from var/log/access.log and print number of occurences
+
+		$ cat access.log | grep system | awk '{sum+=1} END{print "Total occarences of word 'system' is : "sum}'
+		Total occarences of word system is : 6
+		
+		
+12. Create process list table displays process id, parent process id, command name, % of memory
+consumption, % of cpu utilization
+
+		$ ps -f | awk '{print $2"    "$3"       "$6}'
+		PID    PPID       COMMAND
+		480    	1          15
+		7335    7334       /usr/bin/bash
+		8141    7335       /usr/bin/ps
+		7334    1          /usr/bin/mintty
+		8142    7335       /usr/bin/bash
+		
+		
+13. Data analysis / Manipulation (awk)
+		
+		a.
+		
+		$ cat -e data.csv | awk '{if(($4 > 10000)) print $2"\t\t"$7}'
+		EmployeeName            TotalPay
+		NATHANIEL               567595
+		GARY 		            538909
+		ALBERT       		    335279
+		CHRISTOPHER             332343
+		PATRICK         		326373
+		DAVID           		316285
+		ALSON           		315981
+		DAVID           		307899
+		JOANNE          		302377
+		PATRICIA                297608
+		EDWARD          		294580
+		
+		b.
+		
+		step1
+		
+		$ cat data.csv | grep -i captain | awk '{print $7}'
+		OUTPUT
+		
+		538909
+		335279
+		297608
+	
+		step2
+		
+		$ cat data.csv | grep -i captain | awk '{sum+=$7} END{print"Total pay of captains : "sum}'
+		
+		OUTPUT
+		
+		Total pay of captains : 1171796
+
+		C.
+		
+		$ cat -e data.csv | awk '{if(($5 > 7000 && $5 < 10000)) print $3"\t"$5}'
+		
+		OUTPUT
+		
+		DEPUTYCHIEF     9737
+		ASSTDEPUTY      8601
+
+		D.
+		
+		$ cat data.csv | awk '{sum+=$4} END{print"Average of BasePay: "sum/NR}'
+		
+		OUTPUT
+		
+		Average of BasePay: 157972
+
+
+14. Find the difference between original file and updated file, Apply changes to the original file
+
+
+		step1 (creat two directories)
+		
+		$ mkdir original updated
+		
+		step2 (Add data to the files)
+		
+		$ cat > updated.file.sh
+		abcd
+
+		$ cat > original.file.sh
+		abcdef
+		
+		step3(move files into respective folders)
+		
+		$ mv original.file.sh original/original.file.sh
+
+		$ mv updated.file.sh updated/updated.file.sh
+		
+		step4 (get difference between two files)
+		
+		$ git diff original/original.file.sh updated/updated.file.sh
+		diff --git a/original/original.file.sh b/updated/updated.file.sh
+		index d96dc95..85df507 100644
+		--- a/original/original.file.sh
+		+++ b/updated/updated.file.sh
+		@@ -1 +1 @@
+		-abcdef
+		\ No newline at end of file
+		+abcd
+		\ No newline at end of file
+		
+		step 5 (move original file into backup folder)
+		
+		$ mv original/original.file.sh ~/bridge_labz/backup
+		
+		step6 (update original.file.sh)
+		
+		$ cat >> original/original.file.sh
+		ghijkl
+		
+		step7 (get difference between original.file.sh and backup/original.file.sh)
+		
+		$ git diff original/original.file.sh ~/bridge_labz/backup/original.file.sh
+		
+		diff --git a/original/original.file.sh b/C:/Users/Admin/bridge_labz/backup/original.file.sh
+		index 08cf76c..d96dc95 100644
+		--- a/original/original.file.sh
+		+++ b/C:/Users/Admin/bridge_labz/backup/original.file.sh
+		@@ -1 +1 @@
+		-ghijkl
+		\ No newline at end of file
+		+abcdef
+		\ No newline at end of file
+
+
+		
